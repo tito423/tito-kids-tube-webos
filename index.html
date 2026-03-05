@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tito Kids Tube</title>
+
+    <!-- SECURITY: Content Security Policy (relaxed for Piped API compatibility) -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:;
+                   script-src 'self' 'unsafe-inline';
+                   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+                   font-src 'self' https://fonts.gstatic.com;
+                   img-src 'self' https: data:;
+                   media-src 'self' https: blob:;
+                   connect-src *;">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/animations.css">
+</head>
+
+<body>
+    <!-- App Container -->
+    <div id="app">
+        <!-- Header / Navigation Bar -->
+        <header id="nav-bar" class="nav-bar">
+            <div class="nav-brand">
+                <h1 class="nav-title">Tito Kids Tube</h1>
+            </div>
+            <nav class="nav-menu" role="navigation">
+                <button class="nav-btn focusable active" data-view="home" data-nav-group="nav">
+                    <span class="nav-label">الرئيسية</span>
+                </button>
+                <button class="nav-btn focusable" data-view="search" data-nav-group="nav">
+                    <span class="nav-label">بحث</span>
+                </button>
+                <button class="nav-btn focusable" data-view="settings" data-nav-group="nav">
+                    <span class="nav-label">إعدادات</span>
+                </button>
+            </nav>
+            <div class="nav-profile">
+                <span id="profile-badge" class="profile-badge">اطفال</span>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main id="main-content" class="main-content">
+            <!-- Home View -->
+            <section id="view-home" class="view active">
+                <div class="section-header">
+                    <h2>محتوى آمن للأطفال</h2>
+                    <button class="btn-refresh focusable" id="btn-refresh" data-nav-group="actions">
+                        تحديث
+                    </button>
+                </div>
+                <div id="video-grid" class="video-grid" role="grid">
+                    <!-- Video cards injected by JS -->
+                </div>
+                <div id="loading-indicator" class="loading-indicator hidden">
+                    <div class="spinner"></div>
+                    <span>جاري التحميل...</span>
+                </div>
+                <div id="error-message" class="error-message hidden">
+                    <span id="error-text">حدث خطأ</span>
+                    <button class="btn-retry focusable" id="btn-retry" data-nav-group="actions">
+                        إعادة المحاولة
+                    </button>
+                </div>
+            </section>
+
+            <!-- Search View -->
+            <section id="view-search" class="view hidden">
+                <div class="search-container">
+                    <input type="text" id="search-input" class="search-input focusable"
+                        placeholder="ابحث عن فيديو آمن..." maxlength="200" data-nav-group="search" autocomplete="off">
+                    <button id="btn-search" class="btn-search focusable" data-nav-group="search">
+                        بحث
+                    </button>
+                </div>
+                <div id="search-results" class="video-grid" role="grid">
+                </div>
+            </section>
+
+            <!-- Settings View -->
+            <section id="view-settings" class="view hidden">
+                <div class="settings-panel">
+                    <h2>الإعدادات</h2>
+
+                    <div class="setting-group">
+                        <h3>الملف الشخصي</h3>
+                        <div class="setting-options">
+                            <button class="setting-btn focusable active" data-profile="kids" data-nav-group="settings">
+                                اطفال (صارم)
+                            </button>
+                            <button class="setting-btn focusable" data-profile="tween" data-nav-group="settings">
+                                ناشئين (معتدل)
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="setting-group">
+                        <h3>المظهر</h3>
+                        <div class="setting-options">
+                            <button class="setting-btn focusable active" data-theme="dark" data-nav-group="settings">
+                                داكن
+                            </button>
+                            <button class="setting-btn focusable" data-theme="light" data-nav-group="settings">
+                                فاتح
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="setting-group">
+                        <h3>جودة الفيديو</h3>
+                        <div class="setting-options">
+                            <button class="setting-btn focusable active" data-quality="auto" data-nav-group="settings">
+                                تلقائي
+                            </button>
+                            <button class="setting-btn focusable" data-quality="720p" data-nav-group="settings">
+                                720p
+                            </button>
+                            <button class="setting-btn focusable" data-quality="1080p" data-nav-group="settings">
+                                1080p
+                            </button>
+                            <button class="setting-btn focusable" data-quality="4k" data-nav-group="settings">
+                                4K
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="setting-group">
+                        <h3>فلتر الضوء الأزرق</h3>
+                        <div class="setting-options">
+                            <button class="setting-btn focusable" id="btn-bluelight" data-nav-group="settings">
+                                تفعيل / تعطيل
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Player View -->
+            <section id="view-player" class="view hidden">
+                <div class="player-container">
+                    <video id="video-player" class="video-player" controls autoplay>
+                        Your browser does not support the video tag.
+                    </video>
+                    <div class="player-info">
+                        <h2 id="player-title" class="player-title"></h2>
+                        <p id="player-channel" class="player-channel"></p>
+                    </div>
+                    <button id="btn-back" class="btn-back focusable" data-nav-group="player">
+                        رجوع
+                    </button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Blue Light Filter Overlay -->
+    <div id="blue-light-overlay" class="blue-light-overlay hidden"></div>
+
+    <!-- Scripts (order matters) -->
+    <script src="js/security.js"></script>
+    <script src="js/spatial-navigation.js"></script>
+    <script src="js/piped-service.js"></script>
+    <script src="js/content-filter.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,20 @@
+{
+  "id": "com.titokids.tube.webos",
+  "version": "1.0.0",
+  "vendor": "Tito Kids Tube",
+  "type": "web",
+  "main": "index.html",
+  "title": "Tito Kids Tube",
+  "icon": "assets/icon_80x80.png",
+  "largeIcon": "assets/icon_130x130.png",
+  "bgImage": "assets/bg_1920x1080.png",
+  "splashBackground": "#1a1a2e",
+  "iconColor": "#6c5ce7",
+  "resolution": "1920x1080",
+  "disableBackHistoryAPI": false,
+  "handlesRelaunch": false,
+  "requiredPermissions": [
+    "audio.operation",
+    "media.operation"
+  ]
+}

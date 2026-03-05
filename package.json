@@ -1,0 +1,13 @@
+{
+    "name": "tito-kids-tube-webos",
+    "version": "1.0.0",
+    "description": "Tito Kids Tube for LG WebOS Smart TVs",
+    "main": "index.html",
+    "private": true,
+    "scripts": {
+        "dev": "npx live-server --port=8080 --no-browser",
+        "build": "node scripts/build.js",
+        "lint": "npx eslint js/"
+    },
+    "license": "UNLICENSED"
+}
