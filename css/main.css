@@ -1,4 +1,4 @@
-/* Main Layout — Optimized for 1920x1080 and 4K TV */
+/* Main Layout — Responsive for all screens */
 body {
     font-family: var(--font-family);
     background: var(--bg-primary);
@@ -6,8 +6,10 @@ body {
     font-size: var(--font-size-md);
     direction: rtl;
     overflow: hidden;
-    width: 1920px;
-    height: 1080px;
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
 }
 
 #app {

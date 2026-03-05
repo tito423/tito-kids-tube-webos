@@ -24,33 +24,64 @@
     --focus-ring: #6c5ce7;
     --focus-glow: 0 0 0 4px rgba(108, 92, 231, 0.5), 0 0 24px rgba(108, 92, 231, 0.3);
 
-    /* --- Typography --- */
+    /* --- Typography (responsive) --- */
     --font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
-    --font-size-xs: 18px;
-    --font-size-sm: 22px;
-    --font-size-md: 26px;
-    --font-size-lg: 32px;
-    --font-size-xl: 40px;
-    --font-size-xxl: 52px;
+    --font-size-xs: clamp(12px, 1vw, 18px);
+    --font-size-sm: clamp(14px, 1.2vw, 22px);
+    --font-size-md: clamp(16px, 1.4vw, 26px);
+    --font-size-lg: clamp(20px, 1.8vw, 32px);
+    --font-size-xl: clamp(24px, 2.2vw, 40px);
+    --font-size-xxl: clamp(28px, 2.8vw, 52px);
 
-    /* --- Spacing --- */
-    --space-xs: 8px;
-    --space-sm: 12px;
-    --space-md: 20px;
-    --space-lg: 32px;
-    --space-xl: 48px;
+    /* --- Spacing (responsive) --- */
+    --space-xs: clamp(4px, 0.5vw, 8px);
+    --space-sm: clamp(6px, 0.7vw, 12px);
+    --space-md: clamp(10px, 1.1vw, 20px);
+    --space-lg: clamp(16px, 1.7vw, 32px);
+    --space-xl: clamp(24px, 2.5vw, 48px);
 
     /* --- Layout --- */
-    --nav-height: 80px;
+    --nav-height: clamp(50px, 5vw, 80px);
     --card-radius: 16px;
     --btn-radius: 12px;
-    --grid-gap: 24px;
-    --grid-columns: 5;
+    --grid-gap: clamp(12px, 1.3vw, 24px);
+    --grid-columns: 4;
 
     /* --- Animation --- */
     --transition-fast: 150ms ease;
     --transition-normal: 250ms ease;
     --transition-slow: 400ms ease-out;
+}
+
+/* Responsive grid columns */
+@media (max-width: 600px) {
+    :root {
+        --grid-columns: 1;
+    }
+}
+
+@media (min-width: 601px) and (max-width: 900px) {
+    :root {
+        --grid-columns: 2;
+    }
+}
+
+@media (min-width: 901px) and (max-width: 1400px) {
+    :root {
+        --grid-columns: 3;
+    }
+}
+
+@media (min-width: 1401px) and (max-width: 1920px) {
+    :root {
+        --grid-columns: 4;
+    }
+}
+
+@media (min-width: 1921px) {
+    :root {
+        --grid-columns: 5;
+    }
 }
 
 /* Light theme override */

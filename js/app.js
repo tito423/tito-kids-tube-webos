@@ -18,10 +18,20 @@ const App = (() => {
     const FALLBACK_VIDEOS = [
         { id: 'XqZsoesa55w', title: 'تعليم الاطفال الالوان بالعربية', uploaderName: 'قناة تعليمية', thumbnail: 'https://i.ytimg.com/vi/XqZsoesa55w/hqdefault.jpg', duration: 300, description: '' },
         { id: 'hYlFMGGFJBc', title: 'تعلم الحروف العربية مع زكريا', uploaderName: 'تعلم مع زكريا', thumbnail: 'https://i.ytimg.com/vi/hYlFMGGFJBc/hqdefault.jpg', duration: 600, description: '' },
-        { id: '5sFkGtBPaVE', title: 'اناشيد اسلامية للاطفال - محمد نبينا', uploaderName: 'اناشيد اطفال', thumbnail: 'https://i.ytimg.com/vi/5sFkGtBPaVE/hqdefault.jpg', duration: 240, description: '' },
-        { id: 'pranan193pw', title: 'قصص الأنبياء للأطفال - قصة سيدنا نوح', uploaderName: 'قصص القرآن', thumbnail: 'https://i.ytimg.com/vi/pranan193pw/hqdefault.jpg', duration: 480, description: '' },
-        { id: 'L0aWUhkbwxM', title: 'كرتون سراج - الحلقة الأولى', uploaderName: 'سراج كرتون', thumbnail: 'https://i.ytimg.com/vi/L0aWUhkbwxM/hqdefault.jpg', duration: 660, description: '' },
+        { id: '5sFkGtBPaVE', title: 'اناشيد اسلامية للاطفال', uploaderName: 'اناشيد اطفال', thumbnail: 'https://i.ytimg.com/vi/5sFkGtBPaVE/hqdefault.jpg', duration: 240, description: '' },
+        { id: 'L0aWUhkbwxM', title: 'كرتون سراج - تعليم العربية', uploaderName: 'سراج كرتون', thumbnail: 'https://i.ytimg.com/vi/L0aWUhkbwxM/hqdefault.jpg', duration: 660, description: '' },
         { id: 'G69qn2ANYG4', title: 'الارقام العربية للاطفال', uploaderName: 'تعلم العربية', thumbnail: 'https://i.ytimg.com/vi/G69qn2ANYG4/hqdefault.jpg', duration: 360, description: '' },
+        { id: 'yfbJkGOT25Y', title: 'أناشيد الحروف الهجائية', uploaderName: 'أناشيد أطفال', thumbnail: 'https://i.ytimg.com/vi/yfbJkGOT25Y/hqdefault.jpg', duration: 420, description: '' },
+        { id: 'D0Ajq682yrA', title: 'قصص الأنبياء - سيدنا يوسف', uploaderName: 'قصص إسلامية', thumbnail: 'https://i.ytimg.com/vi/D0Ajq682yrA/hqdefault.jpg', duration: 900, description: '' },
+        { id: 'nzVECpG-bGM', title: 'تعلم الحيوانات بالعربية', uploaderName: 'قناة تعليمية', thumbnail: 'https://i.ytimg.com/vi/nzVECpG-bGM/hqdefault.jpg', duration: 480, description: '' },
+        { id: 'Omqb2az2P2g', title: 'سورة الفاتحة للأطفال - تجويد', uploaderName: 'القرآن للأطفال', thumbnail: 'https://i.ytimg.com/vi/Omqb2az2P2g/hqdefault.jpg', duration: 300, description: '' },
+        { id: 'K6DSMZ8b3LE', title: 'أسرتنا - كرتون إسلامي', uploaderName: 'أسرتنا TV', thumbnail: 'https://i.ytimg.com/vi/K6DSMZ8b3LE/hqdefault.jpg', duration: 720, description: '' },
+        { id: 'IXFBhljXIhQ', title: 'تعليم الأشكال للأطفال', uploaderName: 'روضة الأطفال', thumbnail: 'https://i.ytimg.com/vi/IXFBhljXIhQ/hqdefault.jpg', duration: 360, description: '' },
+        { id: 'SFbgEm1-tro', title: 'عمر وهناء - آداب الطعام', uploaderName: 'عمر وهناء', thumbnail: 'https://i.ytimg.com/vi/SFbgEm1-tro/hqdefault.jpg', duration: 480, description: '' },
+        { id: 'BYvu1xTjVXU', title: 'أيام الأسبوع بالعربية', uploaderName: 'تعلم مع زكريا', thumbnail: 'https://i.ytimg.com/vi/BYvu1xTjVXU/hqdefault.jpg', duration: 420, description: '' },
+        { id: 'EIFe-m0kXYk', title: 'الفواكه بالعربية للأطفال', uploaderName: 'تعليم العربية', thumbnail: 'https://i.ytimg.com/vi/EIFe-m0kXYk/hqdefault.jpg', duration: 540, description: '' },
+        { id: 'CHFif_y2TyM', title: 'المهن والحرف - تعليمي', uploaderName: 'قناة أطفال', thumbnail: 'https://i.ytimg.com/vi/CHFif_y2TyM/hqdefault.jpg', duration: 600, description: '' },
+        { id: 'sCNrk-n68CM', title: 'أنشودة طلع البدر علينا', uploaderName: 'أناشيد إسلامية', thumbnail: 'https://i.ytimg.com/vi/sCNrk-n68CM/hqdefault.jpg', duration: 240, description: '' },
     ];
 
     // --- DOM References ---
@@ -136,12 +146,29 @@ const App = (() => {
 
         try {
             const queries = ContentFilter.getSafeQueries(currentProfile);
-            const query = queries[queryIndex % queries.length];
-            queryIndex++;
+            // Load from 3 different queries for more variety
+            const queriesToLoad = [];
+            for (let i = 0; i < 3; i++) {
+                queriesToLoad.push(queries[(queryIndex + i) % queries.length]);
+            }
+            queryIndex += 3;
 
-            console.log('Loading content for query:', query);
-            const results = await PipedService.searchVideos(query);
-            const filtered = ContentFilter.filterVideos(results, currentProfile);
+            console.log('Loading content for queries:', queriesToLoad);
+
+            // Try all queries in parallel
+            const promises = queriesToLoad.map(q => PipedService.searchVideos(q).catch(() => []));
+            const allResults = await Promise.all(promises);
+            const combined = allResults.flat();
+
+            // Deduplicate by video ID
+            const seen = new Set();
+            const unique = combined.filter(v => {
+                if (seen.has(v.id)) return false;
+                seen.add(v.id);
+                return true;
+            });
+
+            const filtered = ContentFilter.filterVideos(unique, currentProfile);
 
             if (filtered.length > 0) {
                 renderVideoGrid(DOM.videoGrid, filtered);
@@ -166,22 +193,49 @@ const App = (() => {
 
         showLoading(true);
         hideError();
+        DOM.searchResults.innerHTML = '';
 
         try {
+            // Search via Invidious API
             const results = await PipedService.searchVideos(query);
             const filtered = ContentFilter.filterVideos(results, currentProfile);
 
             if (filtered.length > 0) {
                 renderVideoGrid(DOM.searchResults, filtered);
             } else {
-                DOM.searchResults.innerHTML = '<div class="error-message"><span>لا نتائج لـ "' + Security.escapeHtml(query) + '"</span></div>';
+                // If API search returned nothing, search with YouTube embed approach
+                searchViaYouTubeQuery(query);
             }
         } catch (err) {
             console.error('Search failed:', err);
-            DOM.searchResults.innerHTML = '<div class="error-message"><span>فشل البحث. حاول مرة أخرى.</span></div>';
+            // Fallback: search with YouTube embed approach
+            searchViaYouTubeQuery(query);
         } finally {
             showLoading(false);
             SpatialNav.refresh();
+        }
+    }
+
+    /**
+     * Fallback search: create cards from known safe queries that match the user's input.
+     * Also suggests the user can try the video directly with a YouTube search.
+     */
+    function searchViaYouTubeQuery(query) {
+        // Filter fallback videos that match the search query
+        const lowerQuery = query.toLowerCase();
+        const matched = FALLBACK_VIDEOS.filter(v =>
+            v.title.toLowerCase().includes(lowerQuery) ||
+            v.uploaderName.toLowerCase().includes(lowerQuery)
+        );
+
+        if (matched.length > 0) {
+            renderVideoGrid(DOM.searchResults, matched);
+        } else {
+            // Show a message with all fallback videos as suggestions
+            DOM.searchResults.innerHTML = '<div class="search-fallback-msg">' +
+                '<p>لم يتم العثور على \"' + Security.escapeHtml(query) + '\" - إليك محتوى آمن مقترح:</p>' +
+                '</div>';
+            renderVideoGrid(DOM.searchResults, FALLBACK_VIDEOS);
         }
     }
 
@@ -195,10 +249,11 @@ const App = (() => {
             const safeChannel = Security.escapeHtml(video.uploaderName);
             const safeId = Security.escapeHtml(video.id);
             const thumbUrl = video.thumbnail || ('https://i.ytimg.com/vi/' + video.id + '/hqdefault.jpg');
+            const sdThumb = 'https://i.ytimg.com/vi/' + video.id + '/sddefault.jpg';
 
             return '<div class="video-card focusable" data-video-id="' + safeId + '" tabindex="0" role="button" aria-label="' + safeTitle + '">' +
                 '<div class="thumbnail-wrapper">' +
-                '<img class="thumbnail" src="' + Security.escapeHtml(thumbUrl) + '" alt="' + safeTitle + '" loading="lazy" onerror="this.style.display=\'none\'">' +
+                '<img class="thumbnail" src="' + Security.escapeHtml(thumbUrl) + '" alt="' + safeTitle + '" loading="lazy" onerror="this.onerror=null;this.src=\'' + Security.escapeHtml(sdThumb) + '\'">' +
                 '<span class="duration-badge">' + PipedService.formatDuration(video.duration) + '</span>' +
                 '</div>' +
                 '<div class="card-info">' +
