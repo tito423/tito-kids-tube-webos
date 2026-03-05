@@ -14,13 +14,14 @@ const App = (() => {
     let blueLightEnabled = false;
     let queryIndex = 0;
 
-    // --- Fallback content when API is unavailable ---
+    // --- Fallback content when API is unavailable (real YouTube IDs) ---
     const FALLBACK_VIDEOS = [
-        { id: 'dQw4w9WgXcQ', title: 'اناشيد اسلامية للاطفال - تعلم الحروف', uploaderName: 'قناة اطفال', thumbnail: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg', duration: 240, description: '' },
-        { id: 'abc123', title: 'قصص الانبياء للاطفال - قصة سيدنا نوح', uploaderName: 'قصص القرآن', thumbnail: 'https://i.ytimg.com/vi/abc123/hqdefault.jpg', duration: 600, description: '' },
-        { id: 'def456', title: 'تعلم مع زكريا - الارقام العربية', uploaderName: 'تعلم مع زكريا', thumbnail: 'https://i.ytimg.com/vi/def456/hqdefault.jpg', duration: 480, description: '' },
-        { id: 'ghi789', title: 'سبيستون - كرتون اسلامي تعليمي', uploaderName: 'سبيستون', thumbnail: 'https://i.ytimg.com/vi/ghi789/hqdefault.jpg', duration: 360, description: '' },
-        { id: 'jkl012', title: 'اناشيد بدون موسيقى للاطفال', uploaderName: 'اناشيد اطفال', thumbnail: 'https://i.ytimg.com/vi/jkl012/hqdefault.jpg', duration: 300, description: '' },
+        { id: 'XqZsoesa55w', title: 'تعليم الاطفال الالوان بالعربية', uploaderName: 'قناة تعليمية', thumbnail: 'https://i.ytimg.com/vi/XqZsoesa55w/hqdefault.jpg', duration: 300, description: '' },
+        { id: 'hYlFMGGFJBc', title: 'تعلم الحروف العربية مع زكريا', uploaderName: 'تعلم مع زكريا', thumbnail: 'https://i.ytimg.com/vi/hYlFMGGFJBc/hqdefault.jpg', duration: 600, description: '' },
+        { id: '5sFkGtBPaVE', title: 'اناشيد اسلامية للاطفال - محمد نبينا', uploaderName: 'اناشيد اطفال', thumbnail: 'https://i.ytimg.com/vi/5sFkGtBPaVE/hqdefault.jpg', duration: 240, description: '' },
+        { id: 'pranan193pw', title: 'قصص الأنبياء للأطفال - قصة سيدنا نوح', uploaderName: 'قصص القرآن', thumbnail: 'https://i.ytimg.com/vi/pranan193pw/hqdefault.jpg', duration: 480, description: '' },
+        { id: 'L0aWUhkbwxM', title: 'كرتون سراج - الحلقة الأولى', uploaderName: 'سراج كرتون', thumbnail: 'https://i.ytimg.com/vi/L0aWUhkbwxM/hqdefault.jpg', duration: 660, description: '' },
+        { id: 'G69qn2ANYG4', title: 'الارقام العربية للاطفال', uploaderName: 'تعلم العربية', thumbnail: 'https://i.ytimg.com/vi/G69qn2ANYG4/hqdefault.jpg', duration: 360, description: '' },
     ];
 
     // --- DOM References ---
@@ -222,10 +223,37 @@ const App = (() => {
 
     // === VIDEO PLAYER ===
 
+    let hlsPlayer = null;
+
+    /**
+     * Load hls.js library dynamically (only when needed).
+     */
+    function loadHlsJs() {
+        return new Promise((resolve, reject) => {
+            if (window.Hls) { resolve(window.Hls); return; }
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js';
+            script.onload = () => resolve(window.Hls);
+            script.onerror = () => reject(new Error('Failed to load hls.js'));
+            document.head.appendChild(script);
+        });
+    }
+
+    /**
+     * Stop any active HLS player instance.
+     */
+    function destroyHls() {
+        if (hlsPlayer) {
+            hlsPlayer.destroy();
+            hlsPlayer = null;
+        }
+    }
+
     async function playVideo(videoId, title, channel) {
         switchView('player');
-        Security.safeSetText(DOM.playerTitle, title);
-        Security.safeSetText(DOM.playerChannel, channel);
+        Security.safeSetText(DOM.playerTitle, title || 'جاري التحميل...');
+        Security.safeSetText(DOM.playerChannel, channel || '');
+        destroyHls();
 
         try {
             const streamData = await PipedService.getVideoStreams(videoId);
@@ -234,17 +262,58 @@ const App = (() => {
                 return;
             }
 
-            const streamUrl = PipedService.selectBestStream(streamData, currentQuality);
-            if (!streamUrl) {
+            // Update title/channel from stream data if available
+            if (streamData.title) Security.safeSetText(DOM.playerTitle, streamData.title);
+            if (streamData.uploader) Security.safeSetText(DOM.playerChannel, streamData.uploader);
+
+            const stream = PipedService.selectBestStream(streamData, currentQuality);
+            if (!stream || !stream.url) {
                 Security.safeSetText(DOM.playerTitle, 'لا يوجد بث متاح');
                 return;
             }
 
-            DOM.videoPlayer.src = streamUrl;
-            DOM.videoPlayer.play().catch(err => {
-                console.error('Playback error:', err);
-                Security.safeSetText(DOM.playerTitle, 'فشل التشغيل');
-            });
+            console.log('Playing:', stream.isHls ? 'HLS' : 'MP4', stream.url);
+
+            if (stream.isHls) {
+                // Try native HLS first (Safari, WebOS TV)
+                if (DOM.videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
+                    DOM.videoPlayer.src = stream.url;
+                    DOM.videoPlayer.play().catch(e => console.error('Native HLS error:', e));
+                } else {
+                    // Load hls.js for browsers that don't support native HLS
+                    try {
+                        const Hls = await loadHlsJs();
+                        if (Hls.isSupported()) {
+                            hlsPlayer = new Hls({ maxBufferLength: 30 });
+                            hlsPlayer.loadSource(stream.url);
+                            hlsPlayer.attachMedia(DOM.videoPlayer);
+                            hlsPlayer.on(Hls.Events.MANIFEST_PARSED, () => {
+                                DOM.videoPlayer.play().catch(e => console.error('HLS play error:', e));
+                            });
+                            hlsPlayer.on(Hls.Events.ERROR, (event, data) => {
+                                console.error('HLS error:', data.type, data.details);
+                                if (data.fatal) {
+                                    Security.safeSetText(DOM.playerTitle, 'خطأ في بث الفيديو');
+                                }
+                            });
+                        } else {
+                            Security.safeSetText(DOM.playerTitle, 'المتصفح لا يدعم تشغيل الفيديو');
+                        }
+                    } catch (hlsErr) {
+                        console.error('HLS.js load failed:', hlsErr);
+                        // Last resort: try direct
+                        DOM.videoPlayer.src = stream.url;
+                        DOM.videoPlayer.play().catch(() => { });
+                    }
+                }
+            } else {
+                // Direct MP4
+                DOM.videoPlayer.src = stream.url;
+                DOM.videoPlayer.play().catch(err => {
+                    console.error('Playback error:', err);
+                    Security.safeSetText(DOM.playerTitle, 'فشل التشغيل');
+                });
+            }
         } catch (err) {
             console.error('Player error:', err);
             Security.safeSetText(DOM.playerTitle, 'حدث خطأ أثناء التشغيل');
@@ -253,6 +322,7 @@ const App = (() => {
 
     function pausePlayer() {
         if (DOM.videoPlayer && !DOM.videoPlayer.paused) DOM.videoPlayer.pause();
+        destroyHls();
     }
 
     // === SETTINGS ===
