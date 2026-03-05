@@ -121,6 +121,12 @@ body {
     display: block;
 }
 
+#view-player.active {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
 /* Section header */
 .section-header {
     display: flex;
@@ -243,11 +249,13 @@ body {
     flex-direction: column;
     background: #000;
     position: relative;
+    min-height: 0;
 }
 
 .video-player {
     width: 100%;
     flex: 1;
+    min-height: 500px;
     background: #000;
     position: relative;
     overflow: hidden;
