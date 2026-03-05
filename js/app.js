@@ -221,97 +221,74 @@ const App = (() => {
         SpatialNav.refresh();
     }
 
-    // === VIDEO PLAYER ===
+    // === VIDEO PLAYER (YouTube IFrame Embed) ===
 
-    let hlsPlayer = null;
+    let ytPlayer = null;
+    let ytReady = false;
 
     /**
-     * Load hls.js library dynamically (only when needed).
+     * Load YouTube IFrame Player API dynamically.
      */
-    function loadHlsJs() {
-        return new Promise((resolve, reject) => {
-            if (window.Hls) { resolve(window.Hls); return; }
-            const script = document.createElement('script');
-            script.src = 'https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js';
-            script.onload = () => resolve(window.Hls);
-            script.onerror = () => reject(new Error('Failed to load hls.js'));
-            document.head.appendChild(script);
+    function loadYouTubeAPI() {
+        return new Promise((resolve) => {
+            if (window.YT && window.YT.Player) { resolve(); return; }
+            window.onYouTubeIframeAPIReady = () => {
+                ytReady = true;
+                resolve();
+            };
+            const tag = document.createElement('script');
+            tag.src = 'https://www.youtube.com/iframe_api';
+            document.head.appendChild(tag);
         });
-    }
-
-    /**
-     * Stop any active HLS player instance.
-     */
-    function destroyHls() {
-        if (hlsPlayer) {
-            hlsPlayer.destroy();
-            hlsPlayer = null;
-        }
     }
 
     async function playVideo(videoId, title, channel) {
         switchView('player');
         Security.safeSetText(DOM.playerTitle, title || 'جاري التحميل...');
         Security.safeSetText(DOM.playerChannel, channel || '');
-        destroyHls();
 
         try {
-            const streamData = await PipedService.getVideoStreams(videoId);
-            if (!streamData) {
-                Security.safeSetText(DOM.playerTitle, 'حدث خطأ في تحميل الفيديو');
-                return;
-            }
-
-            // Update title/channel from stream data if available
-            if (streamData.title) Security.safeSetText(DOM.playerTitle, streamData.title);
-            if (streamData.uploader) Security.safeSetText(DOM.playerChannel, streamData.uploader);
-
-            const stream = PipedService.selectBestStream(streamData, currentQuality);
-            if (!stream || !stream.url) {
-                Security.safeSetText(DOM.playerTitle, 'لا يوجد بث متاح');
-                return;
-            }
-
-            console.log('Playing:', stream.isHls ? 'HLS' : 'MP4', stream.url);
-
-            if (stream.isHls) {
-                // Try native HLS first (Safari, WebOS TV)
-                if (DOM.videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
-                    DOM.videoPlayer.src = stream.url;
-                    DOM.videoPlayer.play().catch(e => console.error('Native HLS error:', e));
-                } else {
-                    // Load hls.js for browsers that don't support native HLS
-                    try {
-                        const Hls = await loadHlsJs();
-                        if (Hls.isSupported()) {
-                            hlsPlayer = new Hls({ maxBufferLength: 30 });
-                            hlsPlayer.loadSource(stream.url);
-                            hlsPlayer.attachMedia(DOM.videoPlayer);
-                            hlsPlayer.on(Hls.Events.MANIFEST_PARSED, () => {
-                                DOM.videoPlayer.play().catch(e => console.error('HLS play error:', e));
-                            });
-                            hlsPlayer.on(Hls.Events.ERROR, (event, data) => {
-                                console.error('HLS error:', data.type, data.details);
-                                if (data.fatal) {
-                                    Security.safeSetText(DOM.playerTitle, 'خطأ في بث الفيديو');
-                                }
-                            });
-                        } else {
-                            Security.safeSetText(DOM.playerTitle, 'المتصفح لا يدعم تشغيل الفيديو');
-                        }
-                    } catch (hlsErr) {
-                        console.error('HLS.js load failed:', hlsErr);
-                        // Last resort: try direct
-                        DOM.videoPlayer.src = stream.url;
-                        DOM.videoPlayer.play().catch(() => { });
-                    }
+            // Try to get metadata from API (non-blocking)
+            PipedService.getVideoStreams(videoId).then(streamData => {
+                if (streamData) {
+                    if (streamData.title) Security.safeSetText(DOM.playerTitle, streamData.title);
+                    if (streamData.uploader) Security.safeSetText(DOM.playerChannel, streamData.uploader);
                 }
+            }).catch(() => { });
+
+            // Load YouTube IFrame API
+            await loadYouTubeAPI();
+
+            // Get or create the player container
+            const container = document.getElementById('player-embed-container');
+
+            if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
+                // Reuse existing player
+                ytPlayer.loadVideoById(videoId);
             } else {
-                // Direct MP4
-                DOM.videoPlayer.src = stream.url;
-                DOM.videoPlayer.play().catch(err => {
-                    console.error('Playback error:', err);
-                    Security.safeSetText(DOM.playerTitle, 'فشل التشغيل');
+                // Clear container and create new player
+                container.innerHTML = '<div id="yt-player-div"></div>';
+                ytPlayer = new YT.Player('yt-player-div', {
+                    videoId: videoId,
+                    width: '100%',
+                    height: '100%',
+                    playerVars: {
+                        autoplay: 1,
+                        controls: 1,
+                        modestbranding: 1,
+                        rel: 0,
+                        fs: 1,
+                        cc_load_policy: 0,
+                        iv_load_policy: 3,
+                        playsinline: 1,
+                        origin: window.location.origin,
+                    },
+                    events: {
+                        onError: (event) => {
+                            console.error('YouTube Player error:', event.data);
+                            Security.safeSetText(DOM.playerTitle, 'حدث خطأ في تشغيل الفيديو');
+                        }
+                    }
                 });
             }
         } catch (err) {
@@ -321,8 +298,11 @@ const App = (() => {
     }
 
     function pausePlayer() {
-        if (DOM.videoPlayer && !DOM.videoPlayer.paused) DOM.videoPlayer.pause();
-        destroyHls();
+        try {
+            if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
+                ytPlayer.pauseVideo();
+            }
+        } catch (e) { /* ignore */ }
     }
 
     // === SETTINGS ===

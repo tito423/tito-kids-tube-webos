@@ -8,11 +8,12 @@
 
     <!-- SECURITY: Content Security Policy (relaxed for Piped API compatibility) -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:;
-                   script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
+                   script-src 'self' 'unsafe-inline' https://www.youtube.com https://cdn.jsdelivr.net;
                    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
                    font-src 'self' https://fonts.gstatic.com;
                    img-src 'self' https: data:;
                    media-src 'self' https: blob:;
+                   frame-src https://www.youtube.com https://www.youtube-nocookie.com;
                    connect-src *;">
 
     <!-- Google Fonts -->
@@ -151,9 +152,9 @@
             <!-- Player View -->
             <section id="view-player" class="view hidden">
                 <div class="player-container">
-                    <video id="video-player" class="video-player" controls autoplay>
-                        Your browser does not support the video tag.
-                    </video>
+                    <div id="player-embed-container" class="video-player">
+                        <!-- YouTube IFrame player will be injected here -->
+                    </div>
                     <div class="player-info">
                         <h2 id="player-title" class="player-title"></h2>
                         <p id="player-channel" class="player-channel"></p>
